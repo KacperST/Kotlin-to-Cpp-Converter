@@ -42,8 +42,6 @@ class ExprVisitor(ParseTreeVisitor):
         if ctx.EQ():
             value = " = " + ctx.literals().getText() + ";\n"
         self.f.write(const + typ + ' ' + name + value)
-        print("var declar", ctx.getText())
-
         pass
 
     # Visit a parse tree produced by ExprParser#variable_assign.
@@ -127,11 +125,16 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#if_statement.
     def visitIf_statement(self, ctx: ExprParser.If_statementContext):
-        return self.visitChildren(ctx)
+        self.f.write(f"if({ctx.if_body().getText()})" + '{\n')
+        for i in ctx.expr():
+            self.visit(i)
+        self.f.write("}\n")
+        pass
+
 
     # Visit a parse tree produced by ExprParser#if_body.
     def visitIf_body(self, ctx: ExprParser.If_bodyContext):
-        return self.visitChildren(ctx)
+        pass
 
     # Visit a parse tree produced by ExprParser#func_declaration.
     def visitFunc_declaration(self, ctx: ExprParser.Func_declarationContext):
@@ -149,19 +152,45 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#for_loop_condition.
     def visitFor_loop_condition(self, ctx: ExprParser.For_loop_conditionContext):
-        return self.visitChildren(ctx)
+        compare = "<"
+        if ctx.DOWNTO():
+            compare = ">"
+
+        if not ctx.STEP() and compare == ">":
+            return "int i = " + ctx.INTLITERAL()[0]\
+                .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i--'
+        elif not ctx.STEP() and compare == "<":
+            return "int i = " + ctx.INTLITERAL()[0]\
+                .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i++'
+        elif compare == "<":
+            return "int i = " + ctx.INTLITERAL()[0] \
+                .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i += {ctx.INTLITERAL()[2].getText()}'
+        if compare == ">":
+            return "int i = " + ctx.INTLITERAL()[0] \
+                .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i -= {ctx.INTLITERAL()[2].getText()}'
+
+        pass
 
     # Visit a parse tree produced by ExprParser#for_loop.
     def visitFor_loop(self, ctx: ExprParser.For_loopContext):
-        return self.visitChildren(ctx)
+        condition = self.visit(ctx.for_loop_condition())
+        self.f.write(f'for({condition})' + '{\n')
+        for i in ctx.expr():
+            self.visit(i)
+        self.f.write("}\n")
+        pass
 
     # Visit a parse tree produced by ExprParser#while_loop.
     def visitWhile_loop(self, ctx: ExprParser.While_loopContext):
-        return self.visitChildren(ctx)
+        self.f.write(f'while( {ctx.while_condition().getText() } )' + "{\n")
+        for i in ctx.expr():
+            self.visit(i)
+        self.f.write("}\n")
+        pass
 
     # Visit a parse tree produced by ExprParser#while_condition.
     def visitWhile_condition(self, ctx: ExprParser.While_conditionContext):
-        return self.visitChildren(ctx)
+        pass
 
     # Visit a parse tree produced by ExprParser#visibility_modifier.
     def visitVisibility_modifier(self, ctx: ExprParser.Visibility_modifierContext):
@@ -222,11 +251,15 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#func_or_class_call.
     def visitFunc_or_class_call(self, ctx: ExprParser.Func_or_class_callContext):
-        if ctx.PRINT():
-            self.f.write("cout << " + ctx.literals().getText() + ";\n")
+        if ctx.IDENTIFIER().getText() == 'print':
+            self.f.write("cout")
+            for i in ctx.literals():
+                self.f.write(" << " + i.getText())
+            self.f.write(" << endl;\n")
+
         else:
-          self.f.write(ctx.getText() + ";\n")
-        return ctx.getText()
+            self.f.write(ctx.getText() + ";\n")
+        pass
         # Visit a parse tree produced by ExprParser#class_visibility_modifier.
 
 
