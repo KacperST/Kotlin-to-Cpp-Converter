@@ -12,7 +12,7 @@ class HelloPrintListener(ExprListener):
 
 def main():
 
-    input_stream = FileStream("data.txt")
+    input_stream = FileStream("data2.txt")
     lexer = ExprLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = ExprParser(stream)

@@ -68,8 +68,7 @@ CHARLITERAL: '"' (~["\\\r\n] | '\\' (. | EOF)) '"';
 BOOLEANLITERAL: 'true' | 'false';
 INTNUMBER: ('0'..'9');
 NULL:  'null';
-ARRAY: 'Array';
-ARRAYOF: 'arrayof';
+PRINT: 'print';
 
 prog: (expr NEWLINE*)*;
 
@@ -185,6 +184,6 @@ class_declaration: visibility_modifier? CLASS IDENTIFIER class_or_func_body LCUR
                     (visibility_modifier? func_declaration NEWLINE* )*
                     RCURL;
 
-func_or_class_call: IDENTIFIER  LPAREN ((literals COMA)* literals)? RPAREN NEWLINE*
+func_or_class_call:  IDENTIFIER  LPAREN ((literals COMA)* literals)? RPAREN NEWLINE*
                     | IDENTIFIER DOT func_or_class_call;
 
