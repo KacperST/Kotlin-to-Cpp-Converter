@@ -1,0 +1,13 @@
+val a:String = "stirng"
+print(a)
+for(i in 21 downTo 1 step 2){
+print(i)
+}
+while(i < 10){
+print(i)
+}
+
+if(a > 10 && b < 2){
+    print("dziala")
+    a += 2
+}

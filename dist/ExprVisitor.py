@@ -125,11 +125,16 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#if_statement.
     def visitIf_statement(self, ctx: ExprParser.If_statementContext):
-        return self.visitChildren(ctx)
+        self.f.write(f"if({ctx.if_body().getText()})" + '{\n')
+        for i in ctx.expr():
+            self.visit(i)
+        self.f.write("}\n")
+        pass
+
 
     # Visit a parse tree produced by ExprParser#if_body.
     def visitIf_body(self, ctx: ExprParser.If_bodyContext):
-        return self.visitChildren(ctx)
+        pass
 
     # Visit a parse tree produced by ExprParser#func_declaration.
     def visitFunc_declaration(self, ctx: ExprParser.Func_declarationContext):
@@ -172,16 +177,20 @@ class ExprVisitor(ParseTreeVisitor):
         self.f.write(f'for({condition})' + '{\n')
         for i in ctx.expr():
             self.visit(i)
-        self.f.write("}")
+        self.f.write("}\n")
         pass
 
     # Visit a parse tree produced by ExprParser#while_loop.
     def visitWhile_loop(self, ctx: ExprParser.While_loopContext):
-        return self.visitChildren(ctx)
+        self.f.write(f'while( {ctx.while_condition().getText() } )' + "{\n")
+        for i in ctx.expr():
+            self.visit(i)
+        self.f.write("}\n")
+        pass
 
     # Visit a parse tree produced by ExprParser#while_condition.
     def visitWhile_condition(self, ctx: ExprParser.While_conditionContext):
-        return self.visitChildren(ctx)
+        pass
 
     # Visit a parse tree produced by ExprParser#visibility_modifier.
     def visitVisibility_modifier(self, ctx: ExprParser.Visibility_modifierContext):
