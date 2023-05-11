@@ -1,0 +1,42 @@
+public class MyClass() {
+    private val s:String = myStr
+    var i:Int = myInt
+    public fun myMethod(){
+        if(i < 10){
+            while(i > 0) {
+                print(s)
+                i--
+            }
+        }
+        else {
+            print("Too big i")
+        }
+    }
+}
+
+fun doSomething() {
+    var x = 2
+    for(i in 1..13){
+        print(x)
+        x++
+    }
+}
+
+fun checkLogic(a:Int,b:Int) {
+    if( a >= 3 && b < 80 ){
+        if(a == 3 || b != 2){
+           var variable = 3.2
+           var nullVariale = Null
+           break
+        }
+    }
+}
+
+fun main(){
+    var x = 5 + 3
+    x -= 2
+    val str: String = "stringggg"
+
+    val myObj = MyClass(str,x)
+    myObj.myMethod()
+}
