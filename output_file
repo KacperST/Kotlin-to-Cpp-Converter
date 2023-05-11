@@ -6,3 +6,9 @@ cout << a << endl;
 for(int i = 21; i > 1; i -= 2){
 cout << i << endl;
 }
+while( i<10 ){
+cout << i << endl;
+}
+if(a>10&&b<2){
+cout << "dziala" << endl;
+}
