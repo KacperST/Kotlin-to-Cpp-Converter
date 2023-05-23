@@ -1,14 +1,44 @@
 #include <iostream> 
 using namespace std;
 
-const string a = "stirng";
-cout << a << endl;
-for(int i = 21; i > 1; i -= 2){
-cout << i << endl;
+class MyClass {
+private:
+	const string s = myStr;
+	int i = myInt;
+	int a;
+	MyClass(int a) {
+		this.a = a;
+	}
+	void myMethod() {
+		if(i<10){
+			while( i>0 ){
+				cout << s << endl;
+				i--;
+			}
+			cout << "Too big i" << endl;
+		}
+	}
 }
-while( i<10 ){
-cout << i << endl;
+void doSomething() {
+	x = 2;
+	for(int i = 1; i < 13; i++){
+		cout << x << endl;
+		x++;
+	}
 }
-if(a>10&&b<2){
-cout << "dziala" << endl;
+void checkLogic(int a, int b) {
+	if(a>=3&&b<80){
+		if(a==3||b!=2){
+			variable = 3.2;
+			nullVariale = Null;
+		}
+	}
+}
+void main() {
+	x = 5+3;
+	 x-=2;
+	const string str = "stringggg";
+	const myObj = MyClass(str,x);
+	myObj.myMethod();
+	checkLogic(a,b);
 }
