@@ -1,4 +1,4 @@
-public class MyClass() {
+public class MyClass(a: Int) {
     private val s:String = myStr
     var i:Int = myInt
     public fun myMethod(){
@@ -39,4 +39,5 @@ fun main(){
 
     val myObj = MyClass(str,x)
     myObj.myMethod()
+    checkLogic(a,b)
 }

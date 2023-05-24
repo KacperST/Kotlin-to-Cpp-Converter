@@ -1,0 +1,6 @@
+fun exmapleFun(number: Int, text: String):Int{
+    number = number + 3
+    print(text)
+    print(number)
+    return number
+}
