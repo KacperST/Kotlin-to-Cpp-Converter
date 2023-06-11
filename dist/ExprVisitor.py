@@ -13,8 +13,11 @@ else:
 
 class ExprVisitor(ParseTreeVisitor):
 
-    def __init__(self):
-        self.f = open("output_file", "w")
+    def __init__(self, f):
+        try:
+            self.f = open(f"{f}/outputfile", "w")
+        except:
+            self.f = open("output_file", "w")
         self.f.write("#include <iostream> \nusing namespace std;\n\n")
 
     # Visit a parse tree produced by ExprParser#prog.
@@ -60,6 +63,10 @@ class ExprVisitor(ParseTreeVisitor):
         typ = self.visitTyp(ctx.typ())
         name = ctx.IDENTIFIER().getText()
         return typ + " " + name, name
+
+    def createAtributes(self, v: ExprParser.ParameterContext):
+        atribute = self.visitVariable_declaration(v)
+        atribute = atribute.split("=")[0] + ";'n"
 
     # Visit a parse tree produced by ExprParser#unary_operator.
     def visitUnary_operator(self, ctx: ExprParser.Unary_operatorContext):
@@ -131,7 +138,6 @@ class ExprVisitor(ParseTreeVisitor):
         self.f.write("}\n")
         pass
 
-
     # Visit a parse tree produced by ExprParser#if_body.
     def visitIf_body(self, ctx: ExprParser.If_bodyContext):
         pass
@@ -157,10 +163,10 @@ class ExprVisitor(ParseTreeVisitor):
             compare = ">"
 
         if not ctx.STEP() and compare == ">":
-            return "int i = " + ctx.INTLITERAL()[0]\
+            return "int i = " + ctx.INTLITERAL()[0] \
                 .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i--'
         elif not ctx.STEP() and compare == "<":
-            return "int i = " + ctx.INTLITERAL()[0]\
+            return "int i = " + ctx.INTLITERAL()[0] \
                 .getText() + ";" + f' i {compare} {ctx.INTLITERAL()[1].getText()}; i++'
         elif compare == "<":
             return "int i = " + ctx.INTLITERAL()[0] \
@@ -182,7 +188,7 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#while_loop.
     def visitWhile_loop(self, ctx: ExprParser.While_loopContext):
-        self.f.write(f'while( {ctx.while_condition().getText() } )' + "{\n")
+        self.f.write(f'while( {ctx.while_condition().getText()} )' + "{\n")
         for i in ctx.expr():
             self.visit(i)
         self.f.write("}\n")
