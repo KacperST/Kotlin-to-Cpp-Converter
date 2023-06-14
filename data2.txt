@@ -1,11 +1,15 @@
-val a:String = "stirng"
+val a:String = "string"
 print(a)
+
 for(i in 21 downTo 1 step 2){
 print(i)
 }
+
 while(i < 10){
 print(i)
 }
+
+val obj = MyClass(3, "TEXT")
 
 if(a > 10 && b < 2){
     print("dziala")
