@@ -2,6 +2,8 @@
 from antlr4 import *
 
 import dist.ExprParser
+import tkinter as tk
+from tkinter import filedialog
 
 if __name__ is not None and "." in __name__:
     from dist.ExprParser import ExprParser
@@ -14,9 +16,8 @@ else:
 class ExprVisitor(ParseTreeVisitor):
     indent = 0
 
-    def __init__(self):
-        self.f = open("output_file", "w")
-        self.f.write("#include <iostream> \nusing namespace std;\n\n")
+    def __init__(self,text_tk):
+        self.text_tk=text_tk
 
     # Visit a parse tree produced by ExprParser#prog.
     def visitProg(self, ctx: ExprParser.ProgContext):
@@ -42,7 +43,7 @@ class ExprVisitor(ParseTreeVisitor):
         value = None
         if ctx.EQ():
             value = " = " + ctx.literals().getText() + ";\n"
-        self.f.write('\t' * self.indent + const + typ + ' ' + name + value)
+        self.text_tk.insert(tk.END,'\t' * self.indent + const + typ + ' ' + name + value)
         pass
 
     # Visit a parse tree produced by ExprParser#variable_assign.
@@ -52,7 +53,7 @@ class ExprVisitor(ParseTreeVisitor):
         name = ctx.IDENTIFIER().getText()
         value = " = " + ctx.literals().getText().replace('\n', '') + ";\n"
         print(ctx.literals().getText())
-        self.f.write('\t' * self.indent + const + name + value)
+        self.text_tk.insert(tk.END,'\t' * self.indent + const + name + value)
         pass
 
     # Visit a parse tree produced by ExprParser#parameter.
@@ -69,25 +70,25 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#unary.
     def visitUnary(self, ctx: ExprParser.UnaryContext):
-        self.f.write('\t' * self.indent + ctx.getText() + ";" + "\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + ctx.getText() + ";" + "\n")
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by ExprParser#operators.
     # zrobione
     def visitOperators(self, ctx: ExprParser.OperatorsContext):
-        self.f.write(" " + ctx.getText() + " ")
+        self.text_tk.insert(tk.END," " + ctx.getText() + " ")
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by ExprParser#logic_operators.
     # zrobione
     # TODO
     def visitLogic_operators(self, ctx: ExprParser.Logic_operatorsContext):
-        self.f.write(" " + ctx.getText() + " ")
+        self.text_tk.insert(tk.END," " + ctx.getText() + " ")
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by ExprParser#numeric_literals.
     def visitNumeric_literals(self, ctx: ExprParser.Numeric_literalsContext):
-        # self.f.write(" " + ctx.getText() + " ")
+        # self.text_tk.insert(tk.END," " + ctx.getText() + " ")
         # return self.visitChildren(ctx)
         pass
 
@@ -102,9 +103,9 @@ class ExprVisitor(ParseTreeVisitor):
     # Visit a parse tree produced by ExprParser#literals.
     def visitLiterals(self, ctx: ExprParser.LiteralsContext):
         if ctx.getText() == "null":
-            self.f.write(" " + "NULL" + "\n")
+            self.text_tk.insert(tk.END," " + "NULL" + "\n")
             pass
-        self.f.write(" " + ctx.getText() + ";\n")
+        self.text_tk.insert(tk.END," " + ctx.getText() + ";\n")
         pass
 
     # Visit a parse tree produced by ExprParser#assignment_type.
@@ -113,12 +114,12 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#assignment.
     def visitAssignment(self, ctx: ExprParser.AssignmentContext):
-        self.f.write('\t' * self.indent + " " + ctx.getText() + ";\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + " " + ctx.getText() + ";\n")
         pass
 
     # Visit a parse tree produced by ExprParser#comparisson_type.
     def visitComparisson_type(self, ctx: ExprParser.Comparisson_typeContext):
-        self.f.write(" " + ctx.getText() + " ")
+        self.text_tk.insert(tk.END," " + ctx.getText() + " ")
         pass
 
     # Visit a parse tree produced by ExprParser#typ.
@@ -127,12 +128,12 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#if_statement.
     def visitIf_statement(self, ctx: ExprParser.If_statementContext):
-        self.f.write('\t' * self.indent + f"if({ctx.if_body().getText()})" + '{\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + f"if({ctx.if_body().getText()})" + '{\n')
         self.indent += 1
         for i in ctx.expr():
             self.visit(i)
         self.indent -= 1
-        self.f.write('\t' * self.indent + "}\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + "}\n")
         pass
 
     # Visit a parse tree produced by ExprParser#if_body.
@@ -144,19 +145,19 @@ class ExprVisitor(ParseTreeVisitor):
         return_type = self.visitTyp(ctx.typ()) if ctx.typ() else '\t' * self.indent + 'void'
         parameters = self.visit(ctx.class_or_func_body())
         name = ctx.IDENTIFIER().getText()
-        self.f.write(f"{return_type} {name}(")
+        self.text_tk.insert(tk.END,f"{return_type} {name}(")
         new_parameters = list(zip(*parameters[:]))
         if new_parameters:
-            self.f.write(', '.join(new_parameters[0]) + ') {\n')
+            self.text_tk.insert(tk.END,', '.join(new_parameters[0]) + ') {\n')
         else:
-            self.f.write(') {\n')
+            self.text_tk.insert(tk.END,') {\n')
         self.indent += 1
         for e in ctx.expr():
             self.visitExpr(e)
         if 'void' not in return_type:
-            self.f.write('\t' * self.indent + f'return {ctx.literals().getText()};\n')
+            self.text_tk.insert(tk.END,'\t' * self.indent + f'return {ctx.literals().getText()};\n')
         self.indent -= 1
-        self.f.write('\t' * self.indent + '}\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 
         # return self.visitChildren(ctx)
 
@@ -184,22 +185,22 @@ class ExprVisitor(ParseTreeVisitor):
     # Visit a parse tree produced by ExprParser#for_loop.
     def visitFor_loop(self, ctx: ExprParser.For_loopContext):
         condition = self.visit(ctx.for_loop_condition())
-        self.f.write('\t' * self.indent + f'for({condition})' + '{\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + f'for({condition})' + '{\n')
         self.indent += 1
         for i in ctx.expr():
             self.visit(i)
         self.indent -= 1
-        self.f.write('\t' * self.indent + "}\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + "}\n")
         pass
 
     # Visit a parse tree produced by ExprParser#while_loop.
     def visitWhile_loop(self, ctx: ExprParser.While_loopContext):
-        self.f.write('\t' * self.indent + f'while( {ctx.while_condition().getText()} )' + "{\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + f'while( {ctx.while_condition().getText()} )' + "{\n")
         self.indent += 1
         for i in ctx.expr():
             self.visit(i)
         self.indent -= 1
-        self.f.write('\t' * self.indent + "}\n")
+        self.text_tk.insert(tk.END,'\t' * self.indent + "}\n")
         pass
 
     # Visit a parse tree produced by ExprParser#while_condition.
@@ -208,7 +209,7 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#visibility_modifier.
     def visitVisibility_modifier(self, ctx: ExprParser.Visibility_modifierContext):
-        self.f.write(f'{ctx[0].getText()} ')
+        self.text_tk.insert(tk.END,f'{ctx[0].getText()} ')
 
     # Visit a parse tree produced by ExprParser#class_or_func_body.
     # zwraca liste parametrow w postaci c++ ( bez srednika )
@@ -231,45 +232,45 @@ class ExprVisitor(ParseTreeVisitor):
         variables = ctx.variable_declaration()
         functions = ctx.func_declaration()
 
-        self.f.write('\t' * self.indent + f'{ctx.CLASS()} {name}' + ' {\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + f'{ctx.CLASS()} {name}' + ' {\n')
         self.indent += 1
         for v in variables:
             index = children.index(v)
             if children[index - 1].getText() in keywords:
-                self.f.write(f"{children[index - 1].getText()}:\n")
+                self.text_tk.insert(tk.END,f"{children[index - 1].getText()}:\n")
             self.visitVariable_declaration(v)
         for i in parameter:
-            self.f.write('\t' * self.indent + i[0] + ";\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + i[0] + ";\n")
         new_parameters = list(zip(*parameter[:]))
         if new_parameters:
-            self.f.write('\t' * self.indent + f'{name}({", ".join(new_parameters[0])})' + " {\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}({", ".join(new_parameters[0])})' + " {\n")
         else:
-            self.f.write('\t' * self.indent + f'{name}()' + " {\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}()' + " {\n")
         self.indent += 1
         for i in parameter:
-            self.f.write('\t' * self.indent + f"this.{i[1]} = {i[1]};\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + f"this.{i[1]} = {i[1]};\n")
         self.indent -= 1
-        self.f.write('\t' * self.indent + '}\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 
         for f in functions:
             index = functions.index(f)
             if functions[index - 1].getText() in keywords:
-                self.f.write('\t' * self.indent + f"{functions[index - 1].getText()}:\n")
+                self.text_tk.insert(tk.END,'\t' * self.indent + f"{functions[index - 1].getText()}:\n")
             self.visitFunc_declaration(f)
         self.indent -= 1
-        self.f.write('\t' * self.indent + '}\n')
+        self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 
         # return self.visitChildren(ctx)
         # for i in ctx.children:
         #     print(i," ", type(i))
         #     if isinstance(i,TerminalNode):
         #         print("adw" ,i)
-        #         self.f.write(str(i) + " ")
+        #         self.text_tk.insert(tk.END,str(i) + " ")
         #     elif isinstance(i,dist.ExprParser.ExprParser.Class_or_func_bodyContext):
         #         parameter = self.visit(i)
         #         print("parameter",parameter)
         #     elif isinstance(i,dist.ExprParser.ExprParser.Func_declarationContext) and not constructor_created:
-        #         self.f.write(str(i) + " ")
+        #         self.text_tk.insert(tk.END,str(i) + " ")
         #     else:
         #         if isinstance(i, dist.ExprParser.ExprParser.Visibility_modifierContext):
         #             continue
@@ -285,20 +286,20 @@ class ExprVisitor(ParseTreeVisitor):
         #
         # body = None
 
-        # self.f.write(class_modifier + " " + name + "{" + "\n")\
+        # self.text_tk.insert(tk.END,class_modifier + " " + name + "{" + "\n")\
         # print(self.visitChildren(ctx))
         # return self.visitChildren(ctx)
 
     # Visit a parse tree produced by ExprParser#func_or_class_call.
     def visitFunc_or_class_call(self, ctx: ExprParser.Func_or_class_callContext):
         if ctx.IDENTIFIER().getText() == 'print':
-            self.f.write('\t' * self.indent + "cout")
+            self.text_tk.insert(tk.END,'\t' * self.indent + "cout")
             for i in ctx.literals():
-                self.f.write(" << " + i.getText())
-            self.f.write(" << endl;\n")
+                self.text_tk.insert(tk.END," << " + i.getText())
+            self.text_tk.insert(tk.END," << endl;\n")
 
         else:
-            self.f.write('\t' * self.indent + ctx.getText().replace('\n', '') + ";\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + ctx.getText().replace('\n', '') + ";\n")
         pass
         # Visit a parse tree produced by ExprParser#class_visibility_modifier.
 
