@@ -1,6 +1,8 @@
 # Generated from Expr.g4 by ANTLR 4.12.0
 from antlr4 import *
-
+import dist.ExprParser
+import tkinter as tk
+from tkinter import filedialog
 import dist.ExprParser
 import tkinter as tk
 from tkinter import filedialog
@@ -16,8 +18,9 @@ else:
 class ExprVisitor(ParseTreeVisitor):
     indent = 0
 
-    def __init__(self,text_tk):
-        self.text_tk=text_tk
+    def __init__(self, text_tk):
+        self.text_tk = text_tk
+        self.text_tk.insert(tk.END,"#include <iostream> \nusing namespace std;\n\n")
 
     # Visit a parse tree produced by ExprParser#prog.
     def visitProg(self, ctx: ExprParser.ProgContext):
@@ -222,8 +225,6 @@ class ExprVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ExprParser#class_declaration.
     def visitClass_declaration(self, ctx: ExprParser.Class_declarationContext):
-        # split po znaku '='
-        # dokończ indent dla klas
         keywords = ('public', 'private', 'protected')
         active_keyword = 'public'
         children = list(ctx.getChildren())
@@ -234,21 +235,37 @@ class ExprVisitor(ParseTreeVisitor):
 
         self.text_tk.insert(tk.END,'\t' * self.indent + f'{ctx.CLASS()} {name}' + ' {\n')
         self.indent += 1
+
+        new_parameters = list(zip(*parameter[:]))
+
+        constructor_dict = {}
+        for x in new_parameters[1]:
+            constructor_dict[x] = x
+        for v in variables:
+            splited = v.getText().split('=')
+            if splited[1] in new_parameters[1]:
+                name2 = v.IDENTIFIER().getText()
+                constructor_dict[splited[1]] = name2
+
+        for i in parameter:
+            if constructor_dict[i[1]] == i[1]:
+                self.text_tk.insert(tk.END,'\t' * self.indent + i[0] + ";\n")
+
         for v in variables:
             index = children.index(v)
             if children[index - 1].getText() in keywords:
                 self.text_tk.insert(tk.END,f"{children[index - 1].getText()}:\n")
-            self.visitVariable_declaration(v)
-        for i in parameter:
-            self.text_tk.insert(tk.END,'\t' * self.indent + i[0] + ";\n")
-        new_parameters = list(zip(*parameter[:]))
+            if v.IDENTIFIER().getText() not in constructor_dict.values():
+                self.visitVariable_declaration(v)
+
         if new_parameters:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}({", ".join(new_parameters[0])})' + " {\n")
         else:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}()' + " {\n")
         self.indent += 1
         for i in parameter:
-            self.text_tk.insert(tk.END,'\t' * self.indent + f"this.{i[1]} = {i[1]};\n")
+            self.text_tk.insert(tk.END,'\t' * self.indent + f"this.{constructor_dict[i[1]]} = {i[1]};\n")
+
         self.indent -= 1
         self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 

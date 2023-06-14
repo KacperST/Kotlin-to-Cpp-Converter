@@ -1,15 +1,14 @@
 #include <iostream> 
 using namespace std;
 
-const string a = "stirng";
-cout << a << endl;
-for(int i = 21; i > 1; i -= 2){
-cout << i << endl;
-}
-while( i<10 ){
-cout << i << endl;
-}
-if(a>10&&b<2){
-cout << "dziala" << endl;
- a+=2;
+class MyClass {
+	int b;
+	const int y = 4;
+	MyClass(int a, int b) {
+		this.x = a;
+		this.b = b;
+	}
+	void myMethod() {
+		cout << "printed myMethod" << endl;
+	}
 }
