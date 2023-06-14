@@ -4,6 +4,8 @@ import dist.ExprParser
 import tkinter as tk
 from tkinter import filedialog
 import dist.ExprParser
+import tkinter as tk
+from tkinter import filedialog
 
 if __name__ is not None and "." in __name__:
     from dist.ExprParser import ExprParser
@@ -230,6 +232,7 @@ class ExprVisitor(ParseTreeVisitor):
         parameter = self.visitClass_or_func_body(ctx.class_or_func_body())
         variables = ctx.variable_declaration()
         functions = ctx.func_declaration()
+
         self.text_tk.insert(tk.END,'\t' * self.indent + f'{ctx.CLASS()} {name}' + ' {\n')
         self.indent += 1
 
@@ -262,6 +265,7 @@ class ExprVisitor(ParseTreeVisitor):
         self.indent += 1
         for i in parameter:
             self.text_tk.insert(tk.END,'\t' * self.indent + f"this.{constructor_dict[i[1]]} = {i[1]};\n")
+
         self.indent -= 1
         self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 

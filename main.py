@@ -40,9 +40,6 @@ def convert():
     visitor = ExprVisitor(text2)
     visitor.visit(tree)
 
-
-
-
 def clear_text():
     text1.delete("1.0", tk.END)
     text2.delete("1.0", tk.END)
