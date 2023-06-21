@@ -1,3 +1,4 @@
+import antlr4.error.Errors
 from antlr4 import *
 from dist.ExprParser import ExprParser
 from dist.ExprLexer import ExprLexer
@@ -31,14 +32,18 @@ def save_file2():
             file.write(text2.get("1.0", tk.END))
 
 def convert():
-    text2.delete("1.0", tk.END)
-    input_stream = InputStream(text1.get("1.0", tk.END))
-    lexer = ExprLexer(input_stream)
-    stream = CommonTokenStream(lexer)
-    parser = ExprParser(stream)
-    tree = parser.prog()
-    visitor = ExprVisitor(text2)
-    visitor.visit(tree)
+    try:
+        text2.delete("1.0", tk.END)
+        input_stream = InputStream(text1.get("1.0", tk.END))
+        lexer = ExprLexer(input_stream)
+        stream = CommonTokenStream(lexer)
+        parser = ExprParser(stream)
+        tree = parser.prog()
+        visitor = ExprVisitor(text2)
+        visitor.visit(tree)
+    except Exception as e:
+        tk.messagebox.showerror("Error", e)
+        print(str(antlr4.error.ErrorListener.ErrorListener.mro()))
 
 def clear_text():
     text1.delete("1.0", tk.END)
