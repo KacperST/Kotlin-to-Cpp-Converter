@@ -43,11 +43,22 @@ class ExprVisitor(ParseTreeVisitor):
         name = ctx.IDENTIFIER().getText()
         const = "const " if ctx.VAL() else ""
 
-        value = None
+        value = ''
         if ctx.EQ():
-            value = " = " + ctx.literals().getText() + ";\n"
-        self.text_tk.insert(tk.END,'\t' * self.indent + const + typ + ' ' + name + value)
+            value = " = " + ctx.literals().getText()
+        self.text_tk.insert(tk.END,'\t' * self.indent + const + typ + ' ' + name + value + ";\n")
         pass
+
+    def visitVariable_declaration_return(self, ctx: ExprParser.Variable_declarationContext):
+        typ = self.visitTyp(ctx.typ())
+        name = ctx.IDENTIFIER().getText()
+        const = "const " if ctx.VAL() else ""
+
+        value = ''
+        if ctx.EQ():
+            value = " = " + ctx.literals().getText()
+        text = '\t' * self.indent + const + typ + ' ' + name + value + ";\n"
+        return text
 
     # Visit a parse tree produced by ExprParser#variable_assign.
     # TODO
@@ -55,7 +66,6 @@ class ExprVisitor(ParseTreeVisitor):
         const = "const " if ctx.VAL() else ""
         name = ctx.IDENTIFIER().getText()
         value = " = " + ctx.literals().getText().replace('\n', '') + ";\n"
-        print(ctx.literals().getText())
         self.text_tk.insert(tk.END,'\t' * self.indent + const + name + value)
         pass
 
@@ -240,31 +250,40 @@ class ExprVisitor(ParseTreeVisitor):
 
         constructor_dict = {}
         for x in new_parameters[1]:
-            constructor_dict[x] = x
+            constructor_dict[x] = x;
         for v in variables:
-            splited = v.getText().split('=')
-            if splited[1] in new_parameters[1]:
+            splited = ''
+            if '=' in v.getText():
+                splited = v.getText().split('=')
+            if splited != '' and splited[1] in new_parameters[1]:
+                if splited[1] in constructor_dict.keys():
+                    constructor_dict.pop(splited[1])
                 name2 = v.IDENTIFIER().getText()
-                constructor_dict[splited[1]] = name2
+                constructor_dict[name2] = splited[1]
 
         for i in parameter:
-            if constructor_dict[i[1]] == i[1]:
+            if i in constructor_dict.keys() and constructor_dict[i[1]] == i[1]:
                 self.text_tk.insert(tk.END,'\t' * self.indent + i[0] + ";\n")
 
         for v in variables:
             index = children.index(v)
             if children[index - 1].getText() in keywords:
-                self.text_tk.insert(tk.END,f"{children[index - 1].getText()}:\n")
-            if v.IDENTIFIER().getText() not in constructor_dict.values():
+                self.text_tk.insert(tk.END, f"{children[index - 1].getText()}:\n")
+            if v.IDENTIFIER().getText() not in constructor_dict.keys():
                 self.visitVariable_declaration(v)
+            else:
+                returned_line = self.visitVariable_declaration_return(v)
+                if '=' in returned_line:
+                    new_line = returned_line.split('=')[0].strip()
+                self.text_tk.insert(tk.END, '\t'*self.indent + f"{new_line};\n")
 
         if new_parameters:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}({", ".join(new_parameters[0])})' + " {\n")
         else:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}()' + " {\n")
         self.indent += 1
-        for i in parameter:
-            self.text_tk.insert(tk.END,'\t' * self.indent + f"this.{constructor_dict[i[1]]} = {i[1]};\n")
+        for left, right in constructor_dict.items():
+            self.text_tk.insert(tk.END,'\t' * self.indent + f"this->{left} = {right};\n")
 
         self.indent -= 1
         self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
@@ -275,37 +294,7 @@ class ExprVisitor(ParseTreeVisitor):
                 self.text_tk.insert(tk.END,'\t' * self.indent + f"{functions[index - 1].getText()}:\n")
             self.visitFunc_declaration(f)
         self.indent -= 1
-        self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
-
-        # return self.visitChildren(ctx)
-        # for i in ctx.children:
-        #     print(i," ", type(i))
-        #     if isinstance(i,TerminalNode):
-        #         print("adw" ,i)
-        #         self.text_tk.insert(tk.END,str(i) + " ")
-        #     elif isinstance(i,dist.ExprParser.ExprParser.Class_or_func_bodyContext):
-        #         parameter = self.visit(i)
-        #         print("parameter",parameter)
-        #     elif isinstance(i,dist.ExprParser.ExprParser.Func_declarationContext) and not constructor_created:
-        #         self.text_tk.insert(tk.END,str(i) + " ")
-        #     else:
-        #         if isinstance(i, dist.ExprParser.ExprParser.Visibility_modifierContext):
-        #             continue
-        #         self.visit(i)
-        # class_modifier = ctx.class_visibility_modifier().getText() if ctx.class_visibility_modifier() is not None else None
-        # # print(class_modifier)
-        # # print(modifier)
-        # name = ctx.IDENTIFIER().getText()
-        # constructor_body = self.visitClass_or_func_body(ctx.class_or_func_body())
-        # paramteters_modifiers = [self.visitParameter_visibility_modifier(i) for i in ctx.parameter_visibility_modifier()] if ctx.parameter_visibility_modifier() is not None else None
-        # func_modifiers = [self.visitFunc_visibility_modifier(i) for i in ctx.func_visibility_modifier()] if ctx.func_visibility_modifier() is not None else None
-        # parameters = ctx.variable_declaration()
-        #
-        # body = None
-
-        # self.text_tk.insert(tk.END,class_modifier + " " + name + "{" + "\n")\
-        # print(self.visitChildren(ctx))
-        # return self.visitChildren(ctx)
+        self.text_tk.insert(tk.END,'\t' * self.indent + '};\n')
 
     # Visit a parse tree produced by ExprParser#func_or_class_call.
     def visitFunc_or_class_call(self, ctx: ExprParser.Func_or_class_callContext):
