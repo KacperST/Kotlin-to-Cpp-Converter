@@ -244,11 +244,17 @@ class ExprVisitor(ParseTreeVisitor):
         functions = ctx.func_declaration()
 
         self.text_tk.insert(tk.END,'\t' * self.indent + f'{ctx.CLASS()} {name}' + ' {\n')
+        self.text_tk.insert(tk.END, '\t' * self.indent + 'public: \n')
+        class_indent = self.indent
         self.indent += 1
 
-        new_parameters = list(zip(*parameter[:]))
+        if parameter:
+            new_parameters = list(zip(*parameter[:]))
+        else:
+            new_parameters = [[],[]]
 
         constructor_dict = {}
+        print(new_parameters)
         for x in new_parameters[1]:
             constructor_dict[x] = x;
         for v in variables:
@@ -268,7 +274,11 @@ class ExprVisitor(ParseTreeVisitor):
         for v in variables:
             index = children.index(v)
             if children[index - 1].getText() in keywords:
-                self.text_tk.insert(tk.END, f"{children[index - 1].getText()}:\n")
+                self.text_tk.insert(tk.END, '\t' * class_indent + f"{children[index - 1].getText()}:\n")
+                active_keyword = children[index - 1].getText()
+            elif active_keyword != keywords[0]:
+                self.text_tk.insert(tk.END, '\t' * class_indent + 'public: \n')
+                active_keyword = keywords[0]
             if v.IDENTIFIER().getText() not in constructor_dict.keys():
                 self.visitVariable_declaration(v)
             else:
@@ -277,14 +287,16 @@ class ExprVisitor(ParseTreeVisitor):
                     new_line = returned_line.split('=')[0].strip()
                 self.text_tk.insert(tk.END, '\t'*self.indent + f"{new_line};\n")
 
-        if new_parameters:
+        if active_keyword != keywords[0]:
+            self.text_tk.insert(tk.END, '\t' * class_indent + 'public: \n')
+
+        if new_parameters != [[], []]:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}({", ".join(new_parameters[0])})' + " {\n")
         else:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'{name}()' + " {\n")
         self.indent += 1
         for left, right in constructor_dict.items():
             self.text_tk.insert(tk.END,'\t' * self.indent + f"this->{left} = {right};\n")
-
         self.indent -= 1
         self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
 
