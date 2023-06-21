@@ -2,15 +2,11 @@ import antlr4.error.Errors
 from antlr4 import *
 from dist.ExprParser import ExprParser
 from dist.ExprLexer import ExprLexer
-from dist.ExprListener import ExprListener
 from dist.ExprVisitor import ExprVisitor
-import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-
 
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
+
 
 def open_file():
     filepath = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
@@ -19,17 +15,20 @@ def open_file():
             text1.delete("1.0", tk.END)
             text1.insert(tk.END, file.read())
 
+
 def save_file1():
     filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
     if filepath:
         with open(filepath, "w") as file:
             file.write(text1.get("1.0", tk.END))
 
+
 def save_file2():
     filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
     if filepath:
         with open(filepath, "w") as file:
             file.write(text2.get("1.0", tk.END))
+
 
 def convert():
     try:
@@ -41,16 +40,18 @@ def convert():
         tree = parser.prog()
         visitor = ExprVisitor(text2)
         visitor.visit(tree)
-    except Exception as e:
-        tk.messagebox.showerror("Error", e)
-        print(str(antlr4.error.ErrorListener.ErrorListener.mro()))
+    except:
+        text2.delete("1.0", tk.END)
+        messagebox.showerror(title="Error", message="Error in Kotlin file. More info in console")
+
 
 def clear_text():
     text1.delete("1.0", tk.END)
     text2.delete("1.0", tk.END)
 
+
 root = tk.Tk()
-root.title("Notepad")
+root.title("Kotlin To C++ Converter")
 
 # Create a frame to hold the text widgets and scrollbars
 frame = tk.Frame(root)
@@ -86,8 +87,8 @@ save_button3.pack(side=tk.LEFT, padx=5, pady=5)
 # Create a menu bar
 menubar = tk.Menu(root)
 filemenu = tk.Menu(menubar, tearoff=0)
-filemenu.add_command(label="Open", command=open_file)
-filemenu.add_command(label="Clear", command=clear_text)
+filemenu.add_command(label="Import file", command=open_file)
+filemenu.add_command(label="Clear text", command=clear_text)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
