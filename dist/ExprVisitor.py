@@ -66,7 +66,7 @@ class ExprVisitor(ParseTreeVisitor):
         const = "const " if ctx.VAL() else ""
         name = ctx.IDENTIFIER().getText()
         value = " = " + ctx.literals().getText().replace('\n', '') + ";\n"
-        self.text_tk.insert(tk.END,'\t' * self.indent + const + name + value)
+        self.text_tk.insert(tk.END,'\t' * self.indent + const + 'auto ' + name + value)
         pass
 
     # Visit a parse tree produced by ExprParser#parameter.
