@@ -158,6 +158,8 @@ class ExprVisitor(ParseTreeVisitor):
         return_type = self.visitTyp(ctx.typ()) if ctx.typ() else '\t' * self.indent + 'void'
         parameters = self.visit(ctx.class_or_func_body())
         name = ctx.IDENTIFIER().getText()
+        if name == 'main':
+            return_type = 'int'
         self.text_tk.insert(tk.END,f"{return_type} {name}(")
         new_parameters = list(zip(*parameters[:]))
         if new_parameters:
@@ -167,7 +169,9 @@ class ExprVisitor(ParseTreeVisitor):
         self.indent += 1
         for e in ctx.expr():
             self.visitExpr(e)
-        if 'void' not in return_type:
+        if name == 'main':
+            self.text_tk.insert(tk.END, '\t' * self.indent + f'return 0;\n')
+        elif 'void' not in return_type:
             self.text_tk.insert(tk.END,'\t' * self.indent + f'return {ctx.literals().getText()};\n')
         self.indent -= 1
         self.text_tk.insert(tk.END,'\t' * self.indent + '}\n')
