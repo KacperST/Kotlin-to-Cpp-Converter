@@ -254,16 +254,12 @@ class ExprVisitor(ParseTreeVisitor):
             new_parameters = [[],[]]
 
         constructor_dict = {}
-        print(new_parameters)
-        for x in new_parameters[1]:
-            constructor_dict[x] = x;
+
         for v in variables:
             splited = ''
             if '=' in v.getText():
                 splited = v.getText().split('=')
             if splited != '' and splited[1] in new_parameters[1]:
-                if splited[1] in constructor_dict.keys():
-                    constructor_dict.pop(splited[1])
                 name2 = v.IDENTIFIER().getText()
                 constructor_dict[name2] = splited[1]
 
